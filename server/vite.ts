@@ -1,15 +1,16 @@
-import express, { type Express } from "express";
-import fs from "fs";
 import path, { dirname } from "path"; // 'path' モジュールから dirname をインポート
 import { fileURLToPath } from "url"; // 'url' モジュールから fileURLToPath をインポート
+import express, { type Express } from "express";
+import fs from "fs";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
 
-const viteLogger = createLogger();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const viteLogger = createLogger();
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -48,11 +49,12 @@ export async function setupVite(app: Express, server: Server) {
     const url = req.originalUrl;
 
     try {
+      // 🚨 修正箇所：import.meta.dirname を __dirname に変更
       const clientTemplate = path.resolve(
-        import.meta.dirname,
-        "..",
-        "client",
-        "index.html",
+          __dirname, // 👈 ここを __dirname に変更
+          "..",
+          "client",
+          "index.html",
       );
 
       // always reload the index.html file from disk incase it changes
