@@ -76,7 +76,8 @@ export async function setupVite(app: Express, server: Server) {
 export function serveStatic(app: Express) {
   // 修正: __dirname を使用してパスを解決
   // path.resolve() の代わりに path.join() を使うと、よりシンプルで安全なパス結合になる
-  const distPath = path.join(__dirname, "..", "public");
+  // 修正: __dirname (dist) の一つ上ではなく、dist 内の public を参照
+  const distPath = path.join(__dirname, "public"); 
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
