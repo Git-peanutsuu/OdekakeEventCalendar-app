@@ -42,21 +42,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (password !== adminPassword) {
         return res.status(401).json({ error: 'Invalid admin password' });
       }
-      
-      // 🚨 修正箇所: Promiseでregenerateをラップし、完了を待つ
-      await new Promise<void>((resolve, reject) => {
-          req.session.regenerate((err) => {
-              if (err) return reject(err);
 
-              // isAdminをセットし、Promiseを解決
-              req.session.isAdmin = true;
+      // 🚨 修正: まず古いセッションを破棄 (CSRF/固定化攻撃対策)
+      await new Promise<void>((resolve, reject) => {
+          req.session.destroy((err) => {
+              if (err) return reject(err);
               resolve();
           });
       });
 
-      // Promise完了後、ここでres.jsonを実行する
+      // 🚨 新しいセッションをセット（Expressが自動で新しいIDを発行）
+      req.session.isAdmin = true;
+
+      // 🚨 修正: セッションの保存完了を強制的に待つ
+      await new Promise<void>((resolve, reject) => {
+          req.session.save((err) => {
+              if (err) return reject(err);
+              resolve();
+          });
+      });
+
+      // 完全に保存が完了した後にレスポンスを返す
       res.json({ success: true, message: 'Admin authenticated successfully' });
-      
     } catch (error) {
       console.error('Error during admin login:', error);
       res.status(500).json({ error: 'Authentication failed' });
