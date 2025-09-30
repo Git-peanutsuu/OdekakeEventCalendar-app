@@ -1,6 +1,6 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-// import ws from "ws";
+// 🚨 変更点: @neondatabase/serverless を pg に変更
+import { Pool } from 'pg'; 
+import { drizzle } from 'drizzle-orm/node-postgres'; // 🚨 変更点: node-postgresを使用
 import * as schema from "@shared/schema";
 
 // neonConfig.webSocketConstructor = ws;
@@ -21,5 +21,5 @@ export const pool = new Pool({
     password: process.env.DB_PASSWORD,
 });
 
-export const db = drizzle({ client: pool, schema });
-// --- 修正終わり ---
+// 🚨 変更点: pool オブジェクトを直接渡す
+export const db = drizzle(pool, { schema }); 
