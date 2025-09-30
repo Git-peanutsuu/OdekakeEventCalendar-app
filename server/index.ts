@@ -4,20 +4,29 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { migrate } from 'drizzle-orm/neon-serverless/migrator';
 import { db } from './db';
+// 🚨 追記: pg の Pool をインポート
+import { pool } from './db.ts'; 
+// 🚨 追記: connect-pg-simple を設定
+import connectPgSimple from 'connect-pg-simple';
 
 const app = express();
+const PgStore = connectPgSimple(session);
 
-// Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'calendar-app-secret',
-  resave: false,
-  saveUninitialized: false, // Don't save empty sessions
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    httpOnly: true,
-    sameSite: 'lax', // CSRF protection
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
+    store: new PgStore({ // 🚨 修正: ここでPgStoreを使用
+        pool: pool,      // 🚨 修正: db.ts で定義した接続プールを渡す
+        tableName: 'session', // セッション情報を保存するテーブル名
+        createTableIfMissing: true // テーブルが存在しない場合は自動作成
+    }),
+    secret: process.env.SESSION_SECRET || 'calendar-app-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
 }));
 
 app.use(express.json());
