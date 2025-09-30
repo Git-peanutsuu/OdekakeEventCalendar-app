@@ -2,7 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { migrate } from 'drizzle-orm/neon-serverless/migrator';
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { db } from './db';
 // 🚨 追記: pg の Pool をインポート
 import { pool } from './db.ts'; 

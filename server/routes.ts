@@ -43,16 +43,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Invalid admin password' });
       }
       
-      // Regenerate session to prevent fixation attacks
-      req.session.regenerate((err) => {
-        if (err) {
-          console.error('Error regenerating session:', err);
-          return res.status(500).json({ error: 'Authentication failed' });
-        }
-        
-        req.session.isAdmin = true;
-        res.json({ success: true, message: 'Admin authenticated successfully' });
+      // 🚨 修正箇所: Promiseでregenerateをラップし、完了を待つ
+      await new Promise<void>((resolve, reject) => {
+          req.session.regenerate((err) => {
+              if (err) return reject(err);
+
+              // isAdminをセットし、Promiseを解決
+              req.session.isAdmin = true;
+              resolve();
+          });
       });
+
+      // Promise完了後、ここでres.jsonを実行する
+      res.json({ success: true, message: 'Admin authenticated successfully' });
+      
     } catch (error) {
       console.error('Error during admin login:', error);
       res.status(500).json({ error: 'Authentication failed' });
