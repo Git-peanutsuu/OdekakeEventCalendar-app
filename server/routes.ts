@@ -49,24 +49,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
               req.session.isAdmin = true; 
 
-              req.session.save((err) => {
-                  if (err) return reject(err);
+            req.session.save((err) => {
+                if (err) return reject(err);
 
-                  req.session.reload((err) => {
-                      if (err) return reject(err);
+                req.session.reload((err) => {
+                    if (err) return reject(err);
 
-                      // ⭐️ ここでレスポンスを返し、Promiseを解決します
-                      res.json({ success: true, message: 'Admin authenticated successfully' });
-                      resolve(); 
-                  });
-              });
+                    // res.json をコールバック内に残す
+                    res.json({ success: true, message: 'Admin authenticated successfully', isAdmin: true }); // 🚨 変更: isAdmin: true を追加
+                    resolve(); 
+                });
+            });
           });
       });
 
       // ⚠️ res.json はコールバック内で実行されるため、ここには到達しない
     } catch (error) {
-      console.error('Error during admin login:', error);
-      res.status(500).json({ error: 'Authentication failed' });
+        console.error('Error during admin login:', error);
+        if (!res.headersSent) { 
+            res.status(500).json({ error: 'Authentication failed' });
+        }
     }
   });
   

@@ -57,12 +57,18 @@ export interface AdminLoginRequest {
   password: string;
 }
 
+export interface AdminLoginResponse {
+  success: boolean;
+  message: string;
+  isAdmin: boolean; // 🚨 これが最重要
+}
 export interface AdminStatusResponse {
   isAdmin: boolean;
 }
 
 export interface AdminResponse {
   success: boolean;
+  isAdmin: boolean;
   message: string;
 }
 

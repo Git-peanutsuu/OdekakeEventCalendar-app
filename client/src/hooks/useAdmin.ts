@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi, AdminLoginRequest } from '@/lib/api';
+import { adminApi, AdminLoginRequest, AdminLoginResponse } from '@/lib/api';
 
 export function useAdminStatus() {
   return useQuery({
@@ -12,15 +12,12 @@ export function useAdminStatus() {
 export function useAdminLogin() {
   const queryClient = useQueryClient();
   
-  return useMutation({
+  // 🚨 修正: <AdminLoginResponse, Error, AdminLoginRequest> のように型を指定
+  return useMutation<AdminLoginResponse, Error, AdminLoginRequest>({ 
     mutationFn: adminApi.login,
-    // 🚨 修正: onSuccess を async に変更し、setTimeout で遅延を挿入
-    onSuccess: async () => { 
-      // サーバーがセッションを確実にコミットする時間を確保するため、100ミリ秒待機する
-      await new Promise(resolve => setTimeout(resolve, 100)); 
-
-      // 遅延後に、最新のセッション情報を取りに行く
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/status'] });
+    onSuccess: (data) => {
+      // dataが AdminLoginResponse 型として認識される
+      queryClient.setQueryData(['/api/admin/status'], { isAdmin: data.isAdmin }); 
     },
   });
 }
