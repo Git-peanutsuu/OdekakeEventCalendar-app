@@ -31,6 +31,9 @@ export function useAdminLogout() {
     mutationFn: adminApi.logout,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/status'] });
+      // 認証ステータスのキャッシュを強制的に無効化
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] }); 
+      queryClient.invalidateQueries({ queryKey: ['/api/location-tags'] }); 
     },
   });
 }
