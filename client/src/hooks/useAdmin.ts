@@ -6,6 +6,8 @@ export function useAdminStatus() {
     queryKey: ['/api/admin/status'],
     queryFn: adminApi.getStatus,
     select: (data) => data.isAdmin,
+    staleTime: 20 * 60 * 1000, 
+    gcTime: Infinity, 
   });
 }
 

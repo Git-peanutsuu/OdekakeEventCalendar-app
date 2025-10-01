@@ -5,6 +5,10 @@ export function useEvents() {
   return useQuery<Event[]>({
     queryKey: ['/api/events'],
     queryFn: eventsApi.getAll,
+    staleTime: 15 * 60 * 1000, 
+    // キャッシュを保持する時間は cacheTime: Infinity, などに設定すると、
+    // 画面遷移しても再取得を試みなくなります（負荷が減る）
+    gcTime: Infinity, 
   });
 }
 

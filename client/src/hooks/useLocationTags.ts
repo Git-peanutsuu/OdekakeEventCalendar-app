@@ -6,6 +6,8 @@ export function useLocationTags() {
   return useQuery({
     queryKey: ['/api/location-tags'],
     queryFn: locationTagsApi.getAll,
+    staleTime: 20 * 60 * 1000, 
+    gcTime: Infinity, 
   });
 }
 
