@@ -42,24 +42,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (password !== adminPassword) {
         return res.status(401).json({ error: 'Invalid admin password' });
       }
-
-      // 🚨 修正: まず古いセッションを破棄 (CSRF/固定化攻撃対策)
       await new Promise<void>((resolve, reject) => {
-          req.session.destroy((err) => {
-              if (err) return reject(err);
-              resolve();
-          });
-      });
+        // regenerate は新しいセッションIDを生成し、req.sessionを新しいオブジェクトで再初期化する
+        req.session.regenerate((err) => {
+            if (err) return reject(err);
 
-      // 🚨 新しいセッションをセット（Expressが自動で新しいIDを発行）
-      req.session.isAdmin = true;
+            // 🚨 req.sessionは新しいオブジェクトになっているので、安全に値を設定できる
+            req.session.isAdmin = true; 
 
-      // 🚨 修正: セッションの保存完了を強制的に待つ
-      await new Promise<void>((resolve, reject) => {
-          req.session.save((err) => {
-              if (err) return reject(err);
-              resolve();
-          });
+            // セッションの保存完了も強制的に待つ
+            req.session.save((err) => { // saveを呼ぶことで、セッションストアへの書き込み完了を待つ
+                if (err) return reject(err);
+                resolve();
+            });
+        });
       });
 
       // 完全に保存が完了した後にレスポンスを返す
