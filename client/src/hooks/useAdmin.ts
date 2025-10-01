@@ -14,11 +14,12 @@ export function useAdminLogin() {
   
   return useMutation({
     mutationFn: adminApi.login,
+    // 🚨 修正: onSuccess を async に変更し、setTimeout で遅延を挿入
     onSuccess: async () => { 
-      // データベースへのセッション書き込みが完全に完了するのを待つため、100ミリ秒の遅延を入れる
+      // サーバーがセッションを確実にコミットする時間を確保するため、100ミリ秒待機する
       await new Promise(resolve => setTimeout(resolve, 100)); 
 
-      // 遅延後にステータスを再確認
+      // 遅延後に、最新のセッション情報を取りに行く
       queryClient.invalidateQueries({ queryKey: ['/api/admin/status'] });
     },
   });
