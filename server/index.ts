@@ -22,9 +22,11 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+      // 🚨 修正 1: Cloud RunはHTTPSのため、production環境では確実にtrueにする
+      // process.env.NODE_ENV がproductionでない可能性があるため、明示的に環境変数の存在もチェックする
+        secure: process.env.NODE_ENV === 'production' || !!process.env.K_SERVICE,
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
