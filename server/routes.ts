@@ -3,23 +3,17 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertEventSchema, insertReferenceWebsiteSchema, insertUserInterestSchema, insertLocationTagSchema } from "@shared/schema";
 import { z } from "zod";
-
-// Extend Request to include session
-interface SessionRequest extends Request {
-  session: {
-    id?: string;
-    [key: string]: any;
-  } & {
-    save: (callback?: (err?: any) => void) => void;
-    regenerate: (callback: (err?: any) => void) => void;
-    destroy: (callback: (err?: any) => void) => void;
-    reload: (callback: (err?: any) => void) => void;
-  };
-  sessionID: string;
+import 'express-session';
+declare module 'express-session' {
+    interface SessionData {
+        isAdmin?: boolean; // isAdmin をセッションデータに追加
+    }
 }
-
+interface AuthRequest extends Request {
+  session: Request['session'] & { isAdmin?: boolean };
+}
 // Session-based admin authentication middleware
-const adminAuth = (req: SessionRequest, res: any, next: any) => {
+const adminAuth = (req: AuthRequest, res: any, next: any) => {
   if (!req.session || !req.session.isAdmin) {
     return res.status(401).json({ error: 'Admin authentication required' });
   }
@@ -29,7 +23,7 @@ const adminAuth = (req: SessionRequest, res: any, next: any) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Admin authentication routes
-  app.post("/api/admin/login", async (req: SessionRequest, res) => {
+  app.post("/api/admin/login", async (req: AuthRequest, res) => {
     try {
       const { password } = req.body;
       const adminPassword = process.env.ADMIN_PASSWORD;
@@ -72,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/admin/logout", async (req: SessionRequest, res) => {
+  app.post("/api/admin/logout", async (req: AuthRequest, res) => {
     try {
       // Destroy session completely on logout
       req.session.destroy((err) => {
@@ -89,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.get("/api/admin/status", async (req: SessionRequest, res) => {
+  app.get("/api/admin/status", async (req: AuthRequest, res) => {
     res.json({ isAdmin: !!req.session?.isAdmin });
   });
 
@@ -114,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/location-tags", adminAuth, async (req: SessionRequest, res) => {
+  app.post("/api/location-tags", adminAuth, async (req: AuthRequest, res) => {
     try {
       const result = insertLocationTagSchema.safeParse(req.body);
       if (!result.success) {
@@ -129,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/location-tags/:id", adminAuth, async (req: SessionRequest, res) => {
+  app.put("/api/location-tags/:id", adminAuth, async (req: AuthRequest, res) => {
     try {
       const result = insertLocationTagSchema.partial().safeParse(req.body);
       if (!result.success) {
@@ -148,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/location-tags/:id", adminAuth, async (req: SessionRequest, res) => {
+  app.delete("/api/location-tags/:id", adminAuth, async (req: AuthRequest, res) => {
     try {
       const success = await storage.deleteLocationTag(req.params.id);
       if (!success) {
@@ -300,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User interests routes (session-based)
-  app.get("/api/user-interests", async (req: SessionRequest, res) => {
+  app.get("/api/user-interests", async (req: AuthRequest, res) => {
     try {
       const sessionId = req.sessionID || 'anonymous';
       const interests = await storage.getUserInterests(sessionId);
@@ -311,7 +305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/user-interests/toggle", async (req: SessionRequest, res) => {
+  app.post("/api/user-interests/toggle", async (req: AuthRequest, res) => {
     try {
       const sessionId = req.sessionID || 'anonymous';
       const { eventId } = req.body;

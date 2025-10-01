@@ -22,12 +22,16 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-      // 🚨 修正 1: Cloud RunはHTTPSのため、production環境では確実にtrueにする
-      // process.env.NODE_ENV がproductionでない可能性があるため、明示的に環境変数の存在もチェックする
-        secure: process.env.NODE_ENV === 'production' || !!process.env.K_SERVICE,
-        httpOnly: true,
-        sameSite: 'none',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      // 🚨 修正: sameSiteを'lax'に戻し、同一オリジンでのクッキー送信を許可
+      // Cloud Runでのデフォルトとして安全な設定です。
+      sameSite: 'lax', 
+      httpOnly: true,
+
+      // 🚨 修正: HTTPS環境（Cloud Run）で確実にクッキーが送られるよう、secureをtrueに固定
+      // 環境変数に依存せず、常に secure: true とします。
+      // ただし、ローカル環境（http://localhost）でのテストはできなくなります。
+      secure: true, 
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
 
