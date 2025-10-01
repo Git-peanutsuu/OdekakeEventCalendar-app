@@ -12,6 +12,7 @@ import connectPgSimple from 'connect-pg-simple';
 const app = express();
 const PgStore = connectPgSimple(session);
 
+app.set('trust proxy', 1);
 app.use(session({
     store: new PgStore({ // 🚨 修正: ここでPgStoreを使用
         pool: pool,      // 🚨 修正: db.ts で定義した接続プールを渡す
