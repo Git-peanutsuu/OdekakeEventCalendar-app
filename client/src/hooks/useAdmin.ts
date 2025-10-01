@@ -14,7 +14,11 @@ export function useAdminLogin() {
   
   return useMutation({
     mutationFn: adminApi.login,
-    onSuccess: () => {
+    onSuccess: async () => { 
+      // データベースへのセッション書き込みが完全に完了するのを待つため、100ミリ秒の遅延を入れる
+      await new Promise(resolve => setTimeout(resolve, 100)); 
+
+      // 遅延後にステータスを再確認
       queryClient.invalidateQueries({ queryKey: ['/api/admin/status'] });
     },
   });
