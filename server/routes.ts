@@ -42,26 +42,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (password !== adminPassword) {
         return res.status(401).json({ error: 'Invalid admin password' });
       }
+      // 🚨 修正: res.json の実行までコールバックチェーンに含める
       await new Promise<void>((resolve, reject) => {
           req.session.regenerate((err) => {
               if (err) return reject(err);
 
               req.session.isAdmin = true; 
 
-              req.session.save((err) => { // データベースへの書き込み完了を待つ
+              req.session.save((err) => {
                   if (err) return reject(err);
 
-                  // 🚨 ここに修正を追加: セッションの再読み込みを強制的に待つ
-                  req.session.reload((err) => { 
+                  req.session.reload((err) => {
                       if (err) return reject(err);
-                      resolve(); // すべて完了したらPromiseを解決
+
+                      // ⭐️ ここでレスポンスを返し、Promiseを解決します
+                      res.json({ success: true, message: 'Admin authenticated successfully' });
+                      resolve(); 
                   });
               });
           });
       });
 
-      // 完全に保存が完了した後にレスポンスを返す
-      res.json({ success: true, message: 'Admin authenticated successfully' });
+      // ⚠️ res.json はコールバック内で実行されるため、ここには到達しない
     } catch (error) {
       console.error('Error during admin login:', error);
       res.status(500).json({ error: 'Authentication failed' });
