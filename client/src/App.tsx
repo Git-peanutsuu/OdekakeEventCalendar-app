@@ -170,6 +170,20 @@ function CalendarApp() {
                 selectedLocationTags={selectedLocationTags}
                 onLocationTagsChange={setSelectedLocationTags}
               />
+            {/* 貼り付ける紹介文ブロック */}
+              <div className="mt-8 mb-12 p-6 bg-card text-card-foreground rounded-xl shadow-lg border border-border">
+                  <h2 className="text-xl font-bold mb-3 text-primary text-center">
+                      このサイトについて
+                  </h2>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                      このカレンダーは、滋賀県を中心とした京都や大阪など周辺の魅力的なイベントや、家族で楽しめるスポット情報を集約しています。
+                      情報は随時更新されており、フィルター機能を使って、あなたにぴったりのイベントを簡単に見つけられます。
+                      週末のおでかけ先などにご活用ください！
+
+                    　*注意：日程や場所について，不確かな情報を提供する場合がございますので，再度詳細のリンクからお確かめください．
+                    　*注意：WEBサイトが重くなるのを避けるため，過去のイベント情報をカレンダーから一定期間後，削除します．ご了承ください。
+                  </p>
+              </div>
             )}
 
             {currentView === 'day' && selectedDate && (
