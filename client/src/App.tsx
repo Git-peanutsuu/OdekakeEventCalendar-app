@@ -162,6 +162,7 @@ function CalendarApp() {
         ) : (
           <>
             {currentView === 'calendar' && (
+            <div className="w-full"> 
               <MonthlyCalendar
                 events={events}
                 locationTags={locationTags}
@@ -169,20 +170,29 @@ function CalendarApp() {
                 selectedDate={selectedDate}
                 selectedLocationTags={selectedLocationTags}
                 onLocationTagsChange={setSelectedLocationTags}
+                
               />
-            {/* 貼り付ける紹介文ブロック */}
-              <div className="mt-8 mb-12 p-6 bg-card text-card-foreground rounded-xl shadow-lg border border-border">
+              {/* 2. 広告スペース（縦幅 h-16） */}
+              {/* <div className="mt-8 mb-4 p-4 bg-yellow-100 dark:bg-yellow-900 border border-yellow-300 dark:border-yellow-700 rounded-lg text-center shadow-md max-w-2xl mx-auto">
+                  <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                      [スポンサー広告枠] 滋賀のおすすめホテル・旅行代理店のバナーが入ります
+                  </p>
+                  <div className="h-16 w-full bg-yellow-200 dark:bg-yellow-800 mt-2 flex items-center justify-center text-xs text-yellow-700 dark:text-yellow-300">
+                      広告バナーエリア (例: 728x90)
+                  </div>
+              </div> */}
+
+              {/* 3. サイト紹介文 */}
+              <div className="mt-8 mb-12 p-6 bg-card text-card-foreground rounded-xl shadow-lg border border-border max-w-2xl mx-auto">
                   <h2 className="text-xl font-bold mb-3 text-primary text-center">
-                      このサイトについて
+                      このサイトについて：滋賀のおでかけを応援！
                   </h2>
                   <p className="text-sm leading-relaxed text-muted-foreground">
-                      このカレンダーは、滋賀県を中心とした京都や大阪など周辺の魅力的なイベントや、家族で楽しめるスポット情報を集約しています。
+                      このカレンダーは、地元住民が厳選した滋賀県周辺の魅力的なイベントや、家族で楽しめるスポット情報を集約しています。
                       情報は随時更新されており、フィルター機能を使って、あなたにぴったりのイベントを簡単に見つけられます。
-                      週末のおでかけ先などにご活用ください！
-
-                    　*注意：日程や場所について，不確かな情報を提供する場合がございますので，再度詳細のリンクからお確かめください．
-                    　*注意：WEBサイトが重くなるのを避けるため，過去のイベント情報をカレンダーから一定期間後，削除します．ご了承ください。
+                      週末のおでかけ先や、地域のお祭り探しにご活用ください！
                   </p>
+              </div>
               </div>
             )}
 
